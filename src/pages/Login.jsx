@@ -75,10 +75,7 @@ const Login = () => {
           {phoneImages(400)}
         </div>
         <div className="flex flex-col justify-center items-center py-10">
-          <div
-            className={`border border-gray-300 ${
-              error ? "h-[425px]" : "h-[390px]"
-            } w-[340px] mb-2`}>
+          <div className={`border border-gray-300 w-[340px] mb-2`}>
             <div className="mb-6 mt-12 mx-auto flex justify-center">
               {loginInstagramIcon("white")}
             </div>
@@ -103,29 +100,33 @@ const Login = () => {
                   className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
               </div>
-              <div className="text-white font-proxima">
+              <div className="text-white font-proxima mt-4 mb-6">
                 <button
                   onClick={() => {
                     attemptLogin();
                   }}
-                  className="mt-4 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
+                  className="bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
                   Log in
                 </button>
-                <button className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto" onClick={() => {
-                  attemptGoogleLogin();
-                }}>
+                <button
+                  className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto"
+                  onClick={() => {
+                    attemptGoogleLogin();
+                  }}>
                   Log in with Google
                 </button>
               </div>
-              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-6">
-                {error && <p>{error}</p>}
-              </div>
-              <div className="my-4 w-[80%] flex items-center mx-auto">
+              {error && (
+                <div className="overflow-auto break-words text-red-500 mb-4 font-proxima font-regular text-sm text-center mx-6">
+                  <p>{error}</p>
+                </div>
+              )}
+              <div className="mb-4 w-[80%] flex items-center mx-auto">
                 <hr className="w-full bg-gray-400" />
                 <p className="text-gray-400 text-sm mx-4">OR</p>
                 <hr className="w-full bg-gray-400" />
               </div>
-              <p className="font-proxima font-light text-xs text-center">
+              <p className="font-proxima font-light text-xs text-center mb-6">
                 <a href="/">Forgot password?</a>
               </p>
             </div>

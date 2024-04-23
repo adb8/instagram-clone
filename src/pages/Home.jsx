@@ -1,17 +1,13 @@
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
+import Sidebar from "../components/Sidebar";
 
 const Home = () => {
   const { currentUser, logout } = useAuth();
 
   return (
-    <div>
-      <button
-        onClick={() => {
-          logout();
-        }}>
-        Logout
-      </button>
+    <div className="bg-black w-full h-screen">
+      <Sidebar />
     </div>
   );
 };

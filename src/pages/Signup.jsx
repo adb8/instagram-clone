@@ -35,7 +35,7 @@ const Signup = () => {
       setError("Username must be at most 30 characters long.");
       return;
     } else if (!/^[a-z0-9]+$/i.test(username)) {
-      setError("Username can only contain alphanumeric characters");
+      setError("Username can only contain alphanumeric characters.");
       return;
     }
     try {
@@ -44,14 +44,14 @@ const Signup = () => {
       const q = query(collection(db, "users"), where("username", "==", username));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        setError("Username already in use");
+        setError("Username is not available. Please try another.");
         setLoading(false);
         return;
       }
       const q2 = query(collection(db, "users"), where("email", "==", emailLowered));
       const querySnapshot2 = await getDocs(q2);
       if (!querySnapshot2.empty) {
-        setError("Email already in use. Please log in.");
+        setError("Email is not available. Please log in.");
         setLoading(false);
         return;
       }
@@ -114,10 +114,7 @@ const Signup = () => {
           {phoneImages(400)}
         </div>
         <div className="flex flex-col justify-center items-center py-10">
-          <div
-            className={`border border-gray-300 ${
-              error ? "h-[450px]" : "h-[410px]"
-            } w-[340px] mb-2`}>
+          <div className={`border border-gray-300 w-[340px] mb-2`}>
             <div className="mb-6 mt-12 mx-auto flex justify-center">
               {loginInstagramIcon("white")}
             </div>
@@ -160,12 +157,12 @@ const Signup = () => {
                   className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
               </div>
-              <div className="text-white font-proxima">
+              <div className="text-white font-proxima mt-4 mb-6">
                 <button
                   onClick={() => {
                     attemptSignup();
                   }}
-                  className="mt-4 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
+                  className="bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
                   Sign up
                 </button>
                 <button
@@ -176,9 +173,11 @@ const Signup = () => {
                   Sign up with Google
                 </button>
               </div>
-              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-6">
-                {error && <p>{error}</p>}
-              </div>
+              {error && (
+                <div className="overflow-auto break-words text-red-500 mb-6 font-proxima font-regular text-sm text-center mx-6">
+                  <p>{error}</p>
+                </div>
+              )}
             </div>
           </div>
           <div className="border border-gray-300 h-[70px] w-[340px] flex flex-col justify-center items-center">
