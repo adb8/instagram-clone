@@ -7,6 +7,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { db, collection, addDoc, query, where, getDocs } from "../firebase";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, currentUser } = useAuth();
+  const { login, currentUser, loginWithGoogle } = useAuth();
 
   const attemptLogin = async () => {
     const emailLowered = email.toLowerCase();
@@ -27,6 +28,38 @@ const Login = () => {
       setError("");
       setLoading(true);
       await login(emailLowered, password);
+      navigate("/home");
+    } catch (error) {
+      console.error(error);
+      setError("Failed to log in. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  const attemptGoogleLogin = async () => {
+    if (loading) return;
+    try {
+      setError("");
+      setLoading(true);
+      const result = await loginWithGoogle();
+      const email = result.user.email;
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        const fullName = result.user.displayName;
+        await addDoc(collection(db, "users"), {
+          uid: result.user.uid,
+          email: email,
+          fullName: fullName,
+          username: email,
+          bio: "",
+          created: new Date(),
+          profilePicture: result.user.photoURL,
+          followers: [],
+          following: [],
+          posts: [],
+        });
+      }
       navigate("/home");
     } catch (error) {
       console.error(error);
@@ -58,7 +91,7 @@ const Login = () => {
                   onChange={(e) => {
                     setEmail(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
                 <input
                   placeholder="Password"
@@ -67,7 +100,7 @@ const Login = () => {
                   onChange={(e) => {
                     setPassword(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
               </div>
               <div className="text-white font-proxima">
@@ -78,11 +111,13 @@ const Login = () => {
                   className="mt-4 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
                   Log in
                 </button>
-                <button className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
+                <button className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto" onClick={() => {
+                  attemptGoogleLogin();
+                }}>
                   Log in with Google
                 </button>
               </div>
-              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-auto">
+              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-6">
                 {error && <p>{error}</p>}
               </div>
               <div className="my-4 w-[80%] flex items-center mx-auto">

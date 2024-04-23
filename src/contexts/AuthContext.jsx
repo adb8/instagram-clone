@@ -50,7 +50,7 @@ const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = () => {
     return signInWithPopup(auth, googleProvider);
-  };
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

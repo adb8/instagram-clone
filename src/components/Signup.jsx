@@ -15,7 +15,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signup, currentUser } = useAuth();
+  const { signup, currentUser, loginWithGoogle } = useAuth();
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
 
@@ -25,20 +25,16 @@ const Signup = () => {
     if (!email || !password || !fullName || !username) {
       setError("Please fill in all fields.");
       return;
-    }
-    if (password.length < 6) {
+    } else if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
       return;
-    }
-    if (username.length < 3) {
+    } else if (username.length < 3) {
       setError("Username must be at least 3 characters long.");
       return;
-    }
-    if (username.length > 30) {
+    } else if (username.length > 30) {
       setError("Username must be at most 30 characters long.");
       return;
-    }
-    if (!/^[a-z0-9]+$/i.test(username)) {
+    } else if (!/^[a-z0-9]+$/i.test(username)) {
       setError("Username can only contain alphanumeric characters");
       return;
     }
@@ -55,7 +51,7 @@ const Signup = () => {
       const q2 = query(collection(db, "users"), where("email", "==", emailLowered));
       const querySnapshot2 = await getDocs(q2);
       if (!querySnapshot2.empty) {
-        setError("Email already in use");
+        setError("Email already in use. Please log in.");
         setLoading(false);
         return;
       }
@@ -76,6 +72,36 @@ const Signup = () => {
       navigate("/home");
     } catch (error) {
       console.error(error);
+      setError("Failed to sign up. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  const attemptGoogleSignup = async () => {
+    if (loading) return;
+    try {
+      const result = await loginWithGoogle();
+      const email = result.user.email;
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        const fullName = result.user.displayName;
+        await addDoc(collection(db, "users"), {
+          uid: result.user.uid,
+          email: email,
+          fullName: fullName,
+          username: email,
+          bio: "",
+          created: new Date(),
+          profilePicture: result.user.photoURL,
+          followers: [],
+          following: [],
+          posts: [],
+        });
+      }
+      navigate("/home");
+    } catch (error) {
+      console.log(error);
       setError("Failed to sign up. Please try again.");
     }
     setLoading(false);
@@ -104,7 +130,7 @@ const Signup = () => {
                   onChange={(e) => {
                     setEmail(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
                 <input
                   placeholder="Full name"
@@ -113,7 +139,7 @@ const Signup = () => {
                   onChange={(e) => {
                     setFullName(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
                 <input
                   placeholder="Username"
@@ -122,7 +148,7 @@ const Signup = () => {
                   onChange={(e) => {
                     setUsername(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
                 <input
                   placeholder="Password"
@@ -131,7 +157,7 @@ const Signup = () => {
                   onChange={(e) => {
                     setPassword(e.target.value);
                   }}
-                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto"
+                  className="bg-gray-50 text-xs border border-gray-200 w-[260px] h-[38px] my-2 rounded-sm px-3 outline-none font-proxima font-light block mx-auto placeholder-gray-500"
                 />
               </div>
               <div className="text-white font-proxima">
@@ -142,11 +168,15 @@ const Signup = () => {
                   className="mt-4 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
                   Sign up
                 </button>
-                <button className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto">
+                <button
+                  className="mt-2 bg-[#4cb5f9] font-semibold rounded-lg w-[260px] h-[30px] text-sm block mx-auto"
+                  onClick={() => {
+                    attemptGoogleSignup();
+                  }}>
                   Sign up with Google
                 </button>
               </div>
-              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-auto">
+              <div className="text-red-500 mt-6 font-proxima font-regular text-sm text-center mx-6">
                 {error && <p>{error}</p>}
               </div>
             </div>
