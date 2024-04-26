@@ -13,6 +13,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -27,6 +28,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 export {
   signInWithPopup,
@@ -46,5 +48,8 @@ export {
   query,
   where,
   getDocs,
+  storage,
+  ref,
+  uploadBytes,
 };
 export default app;

@@ -3,47 +3,59 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Thin.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Thin.otf") format("opentype");
   font-weight: 100;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Light.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Regular.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Semibold.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Semibold.otf")
+    format("opentype");
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Bold.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Proxima Nova';
-  src: url('./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Extrabold.otf') format('opentype');
+  font-family: "Proxima Nova";
+  src: url("./assets/fonts/proxima-nova/Mark Simonson  Proxima Nova Extrabold.otf")
+    format("opentype");
   font-weight: 800;
   font-style: normal;
 }
 
 * {
   box-sizing: border-box;
+  font-family: "Proxima Nova", sans-serif;
+}
+
+.ReactModal__Overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
 }
