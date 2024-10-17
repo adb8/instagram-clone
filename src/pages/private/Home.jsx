@@ -37,7 +37,7 @@ const Home = () => {
   return (
     <div className="bg-black w-full h-screen text-white flex">
       <Sidebar />
-      <div className="flex-1 border">
+      <div className="flex-1 overflow-auto">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
