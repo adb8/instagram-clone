@@ -13,20 +13,16 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    if (!currentUser) return;
-    if (currentUser?.photoUrl) setProfilePicture(currentUser.photoUrl);
-    if (currentUser?.email) setEmail(currentUser.email);
-    if (currentUser?.displayName) setDisplayName(currentUser.displayName);
-  }, [currentUser]);
-
-  useEffect(() => {
     const getPosts = async () => {
       const posts = [];
       const q = query(collection(db, "posts"));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         console.log(doc.id, " => ", doc.data());
-        posts.push(doc.data());
+        posts.push({
+          pid: doc.id,
+          ...doc.data(),
+        });
       });
       console.log("Posts length: ", posts.length);
       setPosts(posts);
@@ -39,7 +35,7 @@ const Home = () => {
       <Sidebar />
       <div className="flex-1 overflow-auto">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.pid} post={post} />
         ))}
       </div>
     </div>
