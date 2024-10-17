@@ -42,7 +42,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     const validTypes = ["image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm"];
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 30 * 1024 * 1024;
     if (file.size > maxSize) {
       console.log("File size exceeds 10MB limit.");
       return;

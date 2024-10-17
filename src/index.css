@@ -59,3 +59,16 @@
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
 }
+
+.styled-video::-webkit-media-controls {
+  display: none !important;
+}
+
+.styled-video::-webkit-media-controls-play-button {
+  display: block !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
