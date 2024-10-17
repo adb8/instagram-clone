@@ -20,8 +20,8 @@ const CreateModal = ({ isOpen, setOpen }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userID = currentUser.uid;
-      const q = query(collection(db, "users"), where("uid", "==", userID));
+      const userId = currentUser.uid;
+      const q = query(collection(db, "users"), where("uid", "==", userId));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         const profilePicture = doc.data().profilePicture;
@@ -63,7 +63,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
     }
     try {
       setModalState("loading");
-      const userID = currentUser.uid;
+      const userId = currentUser.uid;
       const caption = captionRef.current;
       const postType = selectedFile.type.startsWith("image/") ? "image" : "video";
       const fileID = uuidv4();
@@ -74,7 +74,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
       console.log("Uploaded a blob or file!", snapshot);
 
       const post = {
-        userID: userID,
+        userId: userId,
         filePath: filePath,
         postType: postType,
         caption: caption,
@@ -87,6 +87,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
       console.log("Document written with ID: ", docRef.id);
     } catch (error) {
       console.error(error);
+      console.log("Failed to upload post.");
     }
     setSelectedFile(null);
     captionRef.current = "";

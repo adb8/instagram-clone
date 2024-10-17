@@ -13,7 +13,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -51,5 +51,6 @@ export {
   storage,
   ref,
   uploadBytes,
+  getDownloadURL
 };
 export default app;

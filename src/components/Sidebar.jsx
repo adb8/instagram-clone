@@ -15,9 +15,9 @@ import {
   moreIcon,
 } from "../assets/images";
 import { useEffect, useState } from "react";
-import { db, collection, getDocs, query, where } from "../firebase";
 import defaultProfile from "../assets/images/default-profile.jpg";
 import CreateModal from "./CreateModal";
+import { db, collection, getDocs, query, where } from "../firebase";
 
 const Sidebar = () => {
   const { currentUser, logout } = useAuth();
@@ -26,8 +26,8 @@ const Sidebar = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userID = currentUser.uid;
-      const q = query(collection(db, "users"), where("uid", "==", userID));
+      const userId = currentUser.uid;
+      const q = query(collection(db, "users"), where("uid", "==", userId));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         const profilePicture = doc.data().profilePicture;
@@ -37,7 +37,7 @@ const Sidebar = () => {
       });
     };
     fetchUserData();
-  }, []);
+  }, [currentUser]);
 
   return (
     <div className="overflow-hidden h-screen w-[72px] md:w-[245px] bg-[#000000] text-white md:px-[25px] py-[40px] flex flex-col border-r border-[#212121]">
@@ -57,14 +57,20 @@ const Sidebar = () => {
             text="Create"
             onClick={() => setIsOpenCreateModal(true)}
           />
-          <SidebarItem
-            icon={
-              <img src={profilePicture} alt="profile" className="w-[24px] h-[24px] rounded-full" />
-            }
-            text="Profile"
-            to="/profile"
-            noMargin
-          />
+          {profilePicture && (
+            <SidebarItem
+              icon={
+                <img
+                  src={profilePicture}
+                  alt="Profile picture"
+                  className="w-[24px] h-[24px] rounded-full"
+                />
+              }
+              text="Profile"
+              to="/profile"
+              noMargin
+            />
+          )}
         </ul>
         <ul>
           <SidebarItem icon={threadsIcon("white")} text="Threads" to="/threads" />
