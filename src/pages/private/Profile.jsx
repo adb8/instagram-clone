@@ -109,11 +109,11 @@ const Profile = () => {
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <div className="max-w-[930px] ml-auto mr-auto mt-14">
-          <div className="flex items-center gap-[12%] px-14">
+          <div className="flex gap-[12%] px-14">
             {profilePicture && (
               <img src={profilePicture} className="w-[150px] h-[150px] rounded-full" />
             )}
-            <div className="flex flex-col flex-grow mb-3">
+            <div className="flex flex-col flex-grow">
               <div className="flex items-center gap-5">
                 <p className="text-xl font-medium">{email}</p>
                 <div className="flex gap-2 items-center">
