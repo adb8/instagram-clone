@@ -3,7 +3,17 @@ import { useAuth } from "../contexts/AuthContext";
 import ReactModal from "react-modal";
 import { photosVideosIcon, closeIcon, backIcon, sharedIcon } from "../assets/images";
 import defaultProfile from "../assets/images/default-profile.jpg";
-import { db, collection, getDocs, query, where, addDoc } from "../firebase";
+import {
+  db,
+  collection,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  doc,
+  updateDoc,
+  arrayUnion,
+} from "../firebase";
 import { storage, ref, uploadBytes } from "../firebase";
 import { v4 as uuidv4 } from "uuid";
 import autosize from "autosize";
@@ -11,7 +21,7 @@ import { TailSpin } from "react-loader-spinner";
 
 const CreateModal = ({ isOpen, setOpen }) => {
   const fileInput = useRef(null);
-  const [modalState, setModalState] = useState("upload");
+  const [modalState, setModalState] = useState("UPLOAD");
   const [selectedFile, setSelectedFile] = useState();
   const captionRef = useRef("");
   const { currentUser } = useAuth();
@@ -50,19 +60,19 @@ const CreateModal = ({ isOpen, setOpen }) => {
     if (validTypes.includes(file.type)) {
       console.log("Selected file:", file.name);
       setSelectedFile(file);
-      setModalState("crop");
+      setModalState("CROP");
     } else {
       console.log("Invalid file type. Please select an image, gif, or video.");
     }
   };
 
   const uploadPost = async () => {
-    if (!currentUser || !selectedFile || modalState != "share") {
+    if (!currentUser || !selectedFile || modalState != "SHARE") {
       console.log("Invalid post data.");
       return;
     }
     try {
-      setModalState("loading");
+      setModalState("LOADING");
       const userId = currentUser.uid;
       const caption = captionRef.current;
       const postType = selectedFile.type.startsWith("image/") ? "image" : "video";
@@ -71,10 +81,8 @@ const CreateModal = ({ isOpen, setOpen }) => {
       const filePath = `${fileID}.${fileExtension}`;
       const storageRef = ref(storage, "posts/" + filePath);
       const snapshot = await uploadBytes(storageRef, selectedFile);
-      console.log("Uploaded a blob or file!", snapshot);
-
       const post = {
-        userId: userId,
+        uid: userId,
         filePath: filePath,
         postType: postType,
         caption: caption,
@@ -84,14 +92,22 @@ const CreateModal = ({ isOpen, setOpen }) => {
         comments: [],
       };
       const docRef = await addDoc(collection(db, "posts"), post);
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Post added with ID: ", docRef.id);
+      const q = query(collection(db, "users"), where("uid", "==", userId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (document) => {
+        const userDocRef = doc(db, "users", document.id);
+        await updateDoc(userDocRef, {
+          posts: arrayUnion(docRef.id),
+        });
+        console.log("Post added to user's posts array.");
+      });
     } catch (error) {
       console.error(error);
-      console.log("Failed to upload post.");
     }
     setSelectedFile(null);
     captionRef.current = "";
-    setModalState("shared");
+    setModalState("SHARED");
   };
 
   return (
@@ -100,9 +116,9 @@ const CreateModal = ({ isOpen, setOpen }) => {
       shouldCloseOnOverlayClick={true}
       overlayClassName="ReactModal__Overlay"
       className={`${
-        modalState === "share" ? "w-[820px]" : "w-[475px]"
+        modalState === "SHARE" ? "w-[820px]" : "w-[475px]"
       } h-[520px] bg-[#262626] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none`}>
-      {modalState === "upload" && (
+      {modalState === "UPLOAD" && (
         <div>
           <input
             type="file"
@@ -129,20 +145,20 @@ const CreateModal = ({ isOpen, setOpen }) => {
           </div>
         </div>
       )}
-      {modalState === "crop" && (
+      {modalState === "CROP" && (
         <div>
           <div className="flex items-center justify-center h-[45px] border-b border-[#353535]">
             <p className="text-[#f5f5f5] font-semibold mt-1">Crop</p>
             <p
               className="text-[#0094f2] absolute right-0 mx-4 font-semibold text-sm cursor-pointer mt-1"
               onClick={() => {
-                setModalState("share");
+                setModalState("SHARE");
               }}>
               Next
             </p>
             <div className="absolute left-0 mx-4 cursor-pointer">
               {backIcon("white", () => {
-                setModalState("upload");
+                setModalState("UPLOAD");
                 setSelectedFile(null);
               })}
             </div>
@@ -166,7 +182,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
           </div>
         </div>
       )}
-      {modalState === "share" && (
+      {modalState === "SHARE" && (
         <div>
           <div className="flex items-center justify-center h-[45px] border-b border-[#353535]">
             <p className="text-[#f5f5f5] font-semibold mt-1">
@@ -181,7 +197,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
             </p>
             <div className="absolute left-0 mx-4 cursor-pointer">
               {backIcon("white", () => {
-                setModalState("crop");
+                setModalState("CROP");
               })}
             </div>
           </div>
@@ -227,7 +243,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
           </div>
         </div>
       )}
-      {modalState === "loading" && (
+      {modalState === "LOADING" && (
         <div>
           <div className="flex items-center justify-center h-[45px] border-b border-[#353535]">
             <p className="text-[#f5f5f5] font-semibold mt-1">Sharing</p>
@@ -240,13 +256,11 @@ const CreateModal = ({ isOpen, setOpen }) => {
               color="#ffffff"
               ariaLabel="tail-spin-loading"
               radius="1"
-              wrapperStyle={{}}
-              wrapperClass=""
             />
           </div>
         </div>
       )}
-      {modalState === "shared" && (
+      {modalState === "SHARED" && (
         <div>
           <input
             type="file"
@@ -258,7 +272,7 @@ const CreateModal = ({ isOpen, setOpen }) => {
             <p className="text-[#f5f5f5] font-semibold mt-1">Post shared</p>
             <div className="absolute right-0 mx-4 cursor-pointer">
               {closeIcon("white", () => {
-                setModalState("upload");
+                setModalState("UPLOAD");
                 setOpen(false);
               })}
             </div>

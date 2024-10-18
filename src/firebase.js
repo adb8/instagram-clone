@@ -12,7 +12,19 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  getFirestore,
+  arrayRemove,
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc
+} from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
@@ -54,6 +66,8 @@ export {
   getDownloadURL,
   doc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  arrayRemove,
+  getDoc
 };
 export default app;

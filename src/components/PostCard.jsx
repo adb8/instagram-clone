@@ -13,14 +13,17 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
+  getDoc,
 } from "../firebase.js";
-import { formatDistanceToNowStrict } from "date-fns";
+import { formatDistanceToNowStrict, set } from "date-fns";
 import {
   _3dotsIcon,
   saveIcon,
   shareIcon,
   commentIcon,
   notificationsIcon,
+  filledHeartIcon,
 } from "../assets/images.jsx";
 import { getImageSize } from "react-image-size";
 import { useAuth } from "../contexts/AuthContext";
@@ -32,12 +35,14 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
     media: true,
     author: true,
   });
+  const [actionLoading, setActionLoading] = useState(false);
   const [cancelLoad, setCancelLoad] = useState(false);
   const [caption, setCaption] = useState("");
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState([]);
   const [aspectRatio, setAspectRatio] = useState(1);
   const [userComment, setUserComment] = useState("");
+  const [postLiked, setPostLiked] = useState(false);
   const [author, setAuthor] = useState({
     email: "",
     profilePicture: "",
@@ -59,16 +64,37 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
   }, [loading.author, loading.media, cancelLoad]);
 
   useEffect(() => {
+    if (!post || !currentUser) return;
+    const fetchLikes = async () => {
+      try {
+        const docRef = doc(db, "posts", postId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return;
+        const likes = docSnap.data().likes;
+        if (!likes || likes.length === 0) setLikesCount(0);
+        else setLikesCount(likes.length);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchLikes();
+  }, [postLiked]);
+
+  useEffect(() => {
     if (!post) setCancelLoad(true);
-    const { caption, likes, comments, created, filePath, userId } = post;
-    if (!created || !filePath || !userId) {
+    const { caption, likes, comments, created, filePath, uid } = post;
+    if (!created || !filePath || !uid) {
       setCancelLoad(true);
       return;
     }
     if (caption) setCaption(caption);
     if (likes) {
       setLikesCount(likes.length);
-    } else setLikesCount(0);
+      if (likes.includes(currentUser.uid)) setPostLiked(true);
+    } else {
+      setLikesCount(0);
+      setPostLiked(false);
+    }
     if (comments) {
       setCommentsCount(comments.length);
     } else setCommentsCount(0);
@@ -88,7 +114,7 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
 
     const getAuthorInfo = async () => {
       try {
-        const q = query(collection(db, "users"), where("uid", "==", userId));
+        const q = query(collection(db, "users"), where("uid", "==", uid));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const { email, profilePicture, fullName } = doc.data();
@@ -129,16 +155,17 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
     getMediaUrl();
   }, []);
 
-  const postComment = async ({ postId, comment }) => {
+  const postComment = async ({ comment }) => {
+    if (actionLoading) return;
     if (!currentUser || !postId || !comment) {
-      console.log("Invalid comment data");
       return;
     }
+    setActionLoading(true);
     try {
       console.log("Commenting on post: ", postId, " with comment: ", comment);
       const commentDoc = {
-        postId: postId,
-        userId: currentUser.uid,
+        pid: postId,
+        uid: currentUser.uid,
         comment: comment,
         created: new Date(),
         likes: [],
@@ -152,9 +179,70 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
         comments: arrayUnion(docRef.id),
       });
       setUserComment("");
+      fetchComments();
+      setActionLoading(false);
     } catch (error) {
       console.error(error);
       setUserComment("");
+      fetchComments();
+      setActionLoading(false);
+    }
+  };
+
+  const postLike = async () => {
+    if (actionLoading) return;
+    setActionLoading(true);
+    if (!currentUser || !postId) {
+      setActionLoading(false);
+      return;
+    }
+    const originalState = postLiked;
+    try {
+      const postRef = doc(db, "posts", postId);
+      const docSnap = await getDoc(postRef);
+      if (!docSnap.exists()) {
+        setActionLoading(false);
+        return;
+      }
+      const post = docSnap.data();
+      if (post.likes && post.likes.length > 0 && post.likes.includes(currentUser.uid)) {
+        setPostLiked(false);
+        console.log("Unliking post: ", postId);
+        await updateDoc(postRef, {
+          likes: arrayRemove(currentUser.uid),
+        });
+        setActionLoading(false);
+        return;
+      }
+      setPostLiked(true);
+      console.log("Liking post: ", postId);
+      await updateDoc(postRef, {
+        likes: arrayUnion(currentUser.uid),
+      });
+      setActionLoading(false);
+    } catch (error) {
+      console.error(error);
+      setPostLiked(originalState);
+      setActionLoading(false);
+    }
+  };
+
+  const fetchComments = async () => {
+    if (!postId) return;
+    const initialCount = commentsCount;
+    try {
+      const docRef = doc(db, "posts", postId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) return;
+      const comments = docSnap.data().comments;
+      if (!comments || comments.length === 0) {
+        setCommentsCount(0);
+        return;
+      }
+      setCommentsCount(comments.length);
+    } catch (error) {
+      console.error(error);
+      setCommentsCount(initialCount);
     }
   };
 
@@ -240,13 +328,16 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
         </div>
       )}
       <div className="flex gap-4 pt-3">
-        <button>{notificationsIcon("white")}</button>
+        {!postLiked && <button onClick={postLike}>{notificationsIcon("white")}</button>}
+        {postLiked && <button onClick={postLike}>{filledHeartIcon("red")}</button>}
         <button>{commentIcon("white")}</button>
         <button>{shareIcon("white")}</button>
         <button className="ml-auto">{saveIcon("white")}</button>
       </div>
       <div className="pt-2">
-        <p className="font-semibold text-sm">{likesCount} likes</p>
+        <p className="font-semibold text-sm">
+          {likesCount} {likesCount === 1 ? "like" : "likes"}
+        </p>
       </div>
       <div>
         <p className="text-sm pt-1">
@@ -271,7 +362,7 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
           className="text-white bg-transparent outline-none border-none pt-1 w-full"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              postComment({ postId: postId, comment: userComment });
+              postComment({ comment: userComment });
             }
           }}
         />

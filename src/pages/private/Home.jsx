@@ -3,11 +3,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import Sidebar from "../../components/Sidebar";
 import PostCard from "../../components/PostCard";
 import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, db } from "../../firebase.js";
+import { collection, query, where, getDocs, db, getDoc } from "../../firebase.js";
 import { loadingIcon } from "../../assets/images.jsx";
 
 const Home = () => {
-  const { currentUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [postsLoaded, setPostsLoaded] = useState(0);
   const [postsDataRetrieved, setPostsDataRetrieved] = useState(false);
