@@ -46,7 +46,7 @@ const Sidebar = () => {
       <div className="mb-[50px] md:hidden mx-auto">{smallHomeInstagramLogo("white")}</div>
       <div className="flex flex-col justify-between flex-grow">
         <ul>
-          <SidebarItem icon={homeIcon("white")} text="Home" to="/home" />
+          <SidebarItem icon={homeIcon("white")} text="Home" to="/" />
           <SidebarItem icon={searchIcon("white")} text="Search" to="/search" />
           <SidebarItem icon={exploreIcon("white")} text="Explore" to="/explore" />
           <SidebarItem icon={reelsIcon("white")} text="Reels" to="/reels" />
@@ -67,14 +67,21 @@ const Sidebar = () => {
                 />
               }
               text="Profile"
-              to="/profile"
+              to={`/${currentUser.email}`}
               noMargin
             />
           )}
         </ul>
         <ul>
           <SidebarItem icon={threadsIcon("white")} text="Threads" to="/threads" />
-          <SidebarItem icon={moreIcon("white")} text="More" to="/more" noMargin />
+          <SidebarItem
+            icon={moreIcon("white")}
+            text="More"
+            noMargin
+            onClick={() => {
+              logout();
+            }}
+          />
         </ul>
       </div>
     </div>
@@ -83,9 +90,7 @@ const Sidebar = () => {
 
 const SidebarItem = ({ icon, text, active, to, noMargin, onClick }) => {
   return (
-    <li
-      onClick={onClick}
-      className={`font-proxima text-md ${noMargin ? "" : "mb-8"}`}>
+    <li onClick={onClick} className={`font-proxima text-md ${noMargin ? "" : "mb-8"}`}>
       <Link to={to ? to : ""} className="flex items-end justify-center md:justify-start">
         <div className="md:mr-4">{icon}</div>
         <p className="md:h-[22px] hidden md:block">{text}</p>

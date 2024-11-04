@@ -371,13 +371,14 @@ export const loginInstagramIcon = (color) => (
   <i
     data-visualcompletion="css-img"
     aria-label="Instagram"
+    className=""
     role="img"
     style={{
-      backgroundImage: 'url("https://static.cdninstagram.com/rsrc.php/v3/ys/r/WBLlWbPOKZ9.png")',
-      backgroundPosition: "0px 0px",
-      backgroundSize: "176px 264px",
-      width: "174px",
-      height: "50px",
+      backgroundImage: 'url("https://static.cdninstagram.com/rsrc.php/v3/yv/r/KoLLpWDb4f6.png")',
+      backgroundPosition: "0px -52px",
+      backgroundSize: "auto",
+      width: "175px",
+      height: "51px",
       backgroundRepeat: "no-repeat",
       display: "inline-block",
     }}></i>

@@ -69,7 +69,7 @@ const Signup = () => {
         following: [],
         posts: [],
       });
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error(error);
       setError("Failed to sign up. Please try again.");
@@ -99,7 +99,7 @@ const Signup = () => {
           posts: [],
         });
       }
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.log(error);
       setError("Failed to sign up. Please try again.");

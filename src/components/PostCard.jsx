@@ -266,13 +266,19 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
   return (
     <div className={`w-[470px] ml-auto mr-auto border-b border-gray-800 pb-4 mt-2`}>
       <div className="flex gap-3 items-center py-3">
-        {author.profilePicture && (
-          <img src={author.profilePicture} alt="" className="rounded-full w-[32px]" />
+        {author.profilePicture && author.email && (
+          <a href={`/${author.email}`}>
+            <img src={author.profilePicture} alt="" className="rounded-full w-[32px]" />
+          </a>
         )}
-        <div className="text-sm">
-          <span className="font-semibold">{author.email}</span> •{" "}
-          <span className="text-gray-400">{date}</span>
-        </div>
+        {author.email && date && (
+          <div className="text-sm">
+            <span className="font-semibold">
+              <a href={`/${author.email}`}>{author.email}</a>
+            </span>{" "}
+            • <span className="text-gray-400">{date}</span>
+          </div>
+        )}
         <div className="ml-auto">{_3dotsIcon()}</div>
       </div>
       {mediaUrl && aspectRatio >= 1 && postType == "image" && (
@@ -339,11 +345,16 @@ const PostCard = ({ post, onPostLoaded, pageLoading, onPostLoadFailed }) => {
           {likesCount} {likesCount === 1 ? "like" : "likes"}
         </p>
       </div>
-      <div>
-        <p className="text-sm pt-1">
-          <span className="font-semibold">{author.email}</span> {caption}
-        </p>
-      </div>
+      {author.email && (
+        <div>
+          <p className="text-sm pt-1">
+            <span className="font-semibold">
+              <a href={`/${author.email}`}>{author.email}</a>
+            </span>{" "}
+            {caption}
+          </p>
+        </div>
+      )}
       <div className="text-sm pt-1 text-gray-400">
         <p>
           {commentsCount === 0

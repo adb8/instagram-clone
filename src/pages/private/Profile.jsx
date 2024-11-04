@@ -16,6 +16,7 @@ import {
 } from "../../firebase";
 import { gearIcon, postsIcon, loadingIcon } from "../../assets/images";
 import defaultProfile from "../../assets/images/default-profile.jpg";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [profilePicture, setProfilePicture] = useState("");
@@ -27,13 +28,24 @@ const Profile = () => {
   const [followingCount, setFollowingCount] = useState(0);
   const [postsLoaded, setPostsLoaded] = useState(0);
   const [postsDataRetrieved, setPostsDataRetrieved] = useState(false);
+  const [myProfile, setMyProfile] = useState(false);
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const { emailId } = useParams();
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userId = currentUser.uid;
-      const q = query(collection(db, "users"), where("uid", "==", userId));
+      if (!emailId) {
+        setNotFound(true);
+        return;
+      }
+      const q = query(collection(db, "users"), where("email", "==", emailId));
       const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        setNotFound(true);
+        return;
+      }
       querySnapshot.forEach((document) => {
         const profilePicture = document.data().profilePicture;
         const email = document.data().email;
@@ -56,6 +68,7 @@ const Profile = () => {
           setPosts(posts);
           setPostsDataRetrieved(true);
           const mediaUrls = [];
+          console.log(posts.length, " posts found.");
           posts.forEach(async (pid, index) => {
             try {
               const docRef = doc(db, "posts", pid);
@@ -67,6 +80,7 @@ const Profile = () => {
               mediaUrls.push(mediaUrl);
               if (mediaUrls.length === posts.length || index === posts.length - 1) {
                 setMediaUrls(mediaUrls);
+                console.log("Media URLs: ", mediaUrls);
               }
             } catch (error) {
               console.error(error);
@@ -90,6 +104,19 @@ const Profile = () => {
       });
     };
     fetchUserData();
+  }, [emailId]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/login");
+    } else if (!emailId) {
+      setNotFound(true);
+    }
+    if (currentUser.email === emailId) {
+      setMyProfile(true);
+    } else {
+      setMyProfile(false);
+    }
   }, [currentUser]);
 
   useEffect(() => {
@@ -98,6 +125,12 @@ const Profile = () => {
       console.log("All data successfully loaded.");
     }
   }, [postsLoaded, postsDataRetrieved, profilePicture, email]);
+
+  if (notFound) {
+    return (
+      <h1>404: Page Not Found</h1>
+    )
+  }
 
   return (
     <div className="bg-black w-full h-screen text-white flex">
@@ -116,15 +149,17 @@ const Profile = () => {
             <div className="flex flex-col flex-grow">
               <div className="flex items-center gap-5">
                 <p className="text-xl font-medium">{email}</p>
-                <div className="flex gap-2 items-center">
-                  <button className="bg-[#373639] rounded-lg w-[115px] h-[32px] text-sm font-semibold">
-                    Edit profile
-                  </button>
-                  <button className="bg-[#373639] rounded-lg w-[115px] h-[32px] text-sm font-semibold">
-                    View archive
-                  </button>
-                  <div>{gearIcon("white")}</div>
-                </div>
+                {myProfile && (
+                  <div className="flex gap-2 items-center">
+                    <button className="bg-[#373639] rounded-lg w-[115px] h-[32px] text-sm font-semibold">
+                      Edit profile
+                    </button>
+                    <button className="bg-[#373639] rounded-lg w-[115px] h-[32px] text-sm font-semibold">
+                      View archive
+                    </button>
+                    <div>{gearIcon("white")}</div>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-10 mt-6 font-regular">
                 <p>

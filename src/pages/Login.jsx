@@ -60,7 +60,7 @@ const Login = () => {
           posts: [],
         });
       }
-      navigate("/home");
+      navigate("/");
     } catch (error) {
       console.error(error);
       setError("Failed to log in. Please try again.");
